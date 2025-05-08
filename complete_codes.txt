@@ -1,0 +1,447 @@
+### Assign_1_UBS.ipynb
+
+#assignment No:01
+
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv("1.csv")
+
+df.info()
+
+df.head()
+
+df.tail()
+
+df.dtypes
+
+drop_colunm = ['Edition Statement','Corporate Author','Corporate Contributors','Former owner','Engraver','Shelfmarks']
+
+df.drop(drop_colunm, inplace=True, axis=1)
+
+df.head()
+
+df.describe()
+
+df.info()
+
+df['Identifier'].is_unique
+
+df = df.set_index('Identifier')
+df.head()
+
+df.loc[472]
+
+extr = df['Date of Publication'].str.extract(r'^(\d{4})', expand=False)
+extr.head()
+
+df.dtypes
+
+df.loc[1905:, 'Date of Publication'].head(10)
+
+
+df['Date of Publication'] = pd.to_numeric(extr)
+df['Date of Publication'].dtype
+
+df['Date of Publication'].isnull().sum() / len(df)
+
+new_column_names = {
+    "Place of Publication": "Publication Place",
+    "Flickr URl": "URL"
+}
+
+data = df.rename(columns=new_column_names)
+
+data.columns
+
+data.info()
+
+data.head()
+
+import matplotlib.pyplot as plt
+
+df.plot(kind='hist')
+
+df['Publisher'].value_counts().plot(kind='bar' )
+
+df.plot(kind='bar')
+
+### Assign_2_UBS.ipynb
+
+#assignment No:02
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from pandas.core.common import random_state
+from sklearn.linear_model import LinearRegression
+
+# Get dataset
+df = pd.read_csv('2.csv')
+df.head()
+
+df.describe()
+
+X = df.iloc[:, :1]  
+y = df.iloc[:, 1:]  
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
+
+regressor = LinearRegression()
+regressor.fit(X_train, y_train)
+
+y_pred_test = regressor.predict(X_test)     # predicted value of y_test
+y_pred_train = regressor.predict(X_train)   # predicted value of y_train
+
+# Prediction on training set
+plt.scatter(X_train, y_train, color = 'lightcoral')
+plt.plot(X_train, y_pred_train, color = 'firebrick')
+plt.title('Salary vs Experience (Training Set)')
+plt.xlabel('Years of Experience')
+plt.ylabel('Salary')
+plt.legend(['X_train/Pred(y_test)', 'X_train/y_train'], title = 'Sal/Exp', loc='best', facecolor='white')
+plt.box(False)
+plt.show()
+
+# Prediction on test set
+plt.scatter(X_test, y_test, color = 'lightcoral')
+plt.plot(X_train, y_pred_train, color = 'firebrick')
+plt.title('Salary vs Experience (Test Set)')
+plt.xlabel('Years of Experience')
+plt.ylabel('Salary')
+plt.legend(['X_train/Pred(y_test)', 'X_train/y_train'], title = 'Sal/Exp', loc='best', facecolor='white')
+plt.box(False)
+plt.show()
+
+# Regressor coefficients and intercept
+print(f'Coefficient: {regressor.coef_}')
+print(f'Intercept: {regressor.intercept_}')
+
+y_pred=regressor.predict(X_test)
+
+
+from sklearn import metrics
+#Print result of MAE
+print(metrics.mean_absolute_error(y_test,y_pred))
+#Print result of MSE
+print(metrics.mean_squared_error(y_test,y_pred))
+#Print result of RMSE
+print(np.sqrt(metrics.mean_squared_error(y_test,y_pred)))
+
+
+
+
+### Assign_3_UBS.ipynb
+
+#assignment No:03
+
+#import pandas
+import pandas as pd
+# load dataset
+pima = pd.read_csv("3.csv")
+
+pima.head()
+
+pima.shape
+
+#split dataset in features and target variable
+feature_cols = ['age' ,'cigsPerDay', 'prevalentHyp', 'heartRate','totChol','sysBP','diaBP']
+X = pima[feature_cols] # Features
+y = pima.TenYearCHD # Target variable
+
+# split X and y into training and testing data
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=16)
+
+# import the class
+from sklearn.linear_model import LogisticRegression
+
+# instantiate the model (using the default parameters)
+logreg = LogisticRegression(random_state=16)
+
+# fit the model with data
+logreg.fit(X_train, y_train)
+
+y_pred = logreg.predict(X_test)
+
+# import the metrics class
+from sklearn import metrics
+
+cnf_matrix = metrics.confusion_matrix(y_test, y_pred)
+cnf_matrix
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd  
+
+class_names = [0, 1]  # name  of classes
+fig, ax = plt.subplots()
+tick_marks = np.arange(len(class_names))
+plt.xticks(tick_marks, class_names)
+plt.yticks(tick_marks, class_names)
+
+# create heatmap
+# Assuming cnf_matrix is defined elsewhere in your code
+sns.heatmap(pd.DataFrame(cnf_matrix), annot=True, cmap="YlGnBu", fmt='g', ax=ax)  # added ax=ax here
+ax.xaxis.set_label_position("top")
+plt.tight_layout()
+plt.title('Confusion matrix', y=1.1)
+plt.ylabel('Actual label')
+plt.xlabel('Predicted label')
+plt.show()
+
+
+from sklearn.metrics import classification_report
+target_names = ['without Heart Disease', 'with Heart Disease']
+print(classification_report(y_test, y_pred, target_names=target_names))
+
+y_pred_proba = logreg.predict_proba(X_test)[::,1]
+fpr, tpr, _ = metrics.roc_curve(y_test,  y_pred_proba)
+auc = metrics.roc_auc_score(y_test, y_pred_proba)
+plt.plot(fpr,tpr,label="data 1, auc="+str(auc))
+plt.legend(loc=4)
+plt.show()
+
+# import required modules
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd  
+
+# Plot count of 'TenYearCHD' column
+sns.countplot(x='TenYearCHD', data=pima, palette='hls')
+plt.title('Count of Heart Disease')
+plt.xlabel('Heart Disease (0: No, 1: Yes)')
+plt.ylabel('Count')
+
+# Save the plot
+plt.savefig('count_plot.png')
+
+# Show plot
+plt.show()
+
+
+### Assign_5_UBS.ipynb
+
+#assignment No:05
+
+import pandas as pd 
+
+
+import numpy as np 
+
+
+
+import pandas as pd 
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn import metrics
+
+df=pd.read_csv('5.csv')
+
+df.head()
+
+df.info()
+
+x=df.drop('Outcome',axis=1)
+y=df['Outcome']
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=1)
+
+tr=DecisionTreeClassifier(max_depth=3)
+tr.fit(x_train,y_train)
+
+y_pred = tr.predict(x_test)
+y_pred
+
+metrics.accuracy_score(y_test,y_pred)
+
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+
+
+"""# Plot the Decision Tree
+plt.figure(figsize=(20, 10))  # Adjust the figure size as needed
+plot_tree(tr, feature_names=x.columns, class_names=['Non-Diabetic', 'Diabetic'], filled=True)
+plt.show()"""
+
+
+
+# Convert DataFrame index to list
+feature_names = list(x.columns)
+
+# Plot the Decision Tree
+plt.figure(figsize=(20, 10))
+plot_tree(tr, feature_names=feature_names, class_names=['Non-Diabetic', 'Diabetic'], filled=True)
+plt.show()
+
+
+### Assign_6_UBS.ipynb
+
+#assignment No:06
+
+# Data Processing
+import pandas as pd
+import numpy as np
+
+# Modelling
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, ConfusionMatrixDisplay
+from sklearn.model_selection import RandomizedSearchCV, train_test_split
+from scipy.stats import randint
+
+# Tree Visualisation
+from sklearn.tree import export_graphviz
+from IPython.display import Image
+import graphlib
+
+bank_data.head()bank_data = pd.read_csv(r"c:\Users\Sanjivani Group\Desktop\ML_IT_317_DATASET\6.csv", sep=';')
+
+
+bank_data['default'] = bank_data['default'].map({'no': 0, 'yes': 1, 'unknown': 0})
+bank_data['y'] = bank_data['y'].map({'no': 0, 'yes': 1})
+
+
+bank_data.columns = bank_data.columns.str.replace('"', '')
+
+bank_data.head()
+
+bank_data.tail()
+
+bank_data.shape
+
+# Split the data into X and y
+X = bank_data.drop('y', axis=1)
+y = bank_data['y']
+
+# categorical variables
+X_encoded = pd.get_dummies(X)
+
+# Split data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.2)
+
+rf = RandomForestClassifier()
+rf.fit(X_train, y_train)
+
+# Predict using the trained RandomForestClassifier model
+y_pred = rf.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy:", accuracy)
+
+for i in range(3):
+    tree = rf.estimators_[i]
+    dot_data = export_graphviz(tree,
+                               feature_names=X_train.columns,  
+                               filled=True,  
+                               max_depth=2, 
+                               impurity=False, 
+                               proportion=True)
+    graph = graphviz.Source(dot_data)
+    display(graph)
+
+param_dist = {'n_estimators': randint(50,500),
+              'max_depth': randint(1,20)}
+
+# Create a random forest classifier
+rf = RandomForestClassifier()
+# Use random search to find the best hyperparameters
+rand_search = RandomizedSearchCV(rf, 
+                                 param_distributions = param_dist, 
+                                 n_iter=5, 
+                                 cv=5)
+
+# Fit the random search object to the data
+rand_search.fit(X_train, y_train)
+
+# Create a variable for the best model
+best_rf = rand_search.best_estimator_
+
+# Print the best hyperparameters
+print('Best hyperparameters:',  rand_search.best_params_)
+
+# Generate predictions with the best model
+y_pred = best_rf.predict(X_test)
+
+# Create the confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+ConfusionMatrixDisplay(confusion_matrix=cm).plot();
+
+# Create a series containing feature importances from the model and feature names from the training data
+feature_importances = pd.Series(best_rf.feature_importances_, index=X_train.columns).sort_values(ascending=False)
+
+# Plot a simple bar chart
+feature_importances.plot.bar();
+
+
+
+
+### Assign_7_UBS.ipynb
+
+#assignment No:07
+
+
+import pandas as pd
+
+home_data = pd.read_csv(r'C:\Users\Sanjivani Group\Desktop\ml\pd.csv', usecols = ['longitude', 'latitude', 'median_house_value'])
+home_data.head()
+
+
+import seaborn as sns
+
+sns.scatterplot(data = home_data, x = 'longitude', y = 'latitude', hue = 'median_house_value')
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(home_data[['latitude', 'longitude']], home_data[['median_house_value']], test_size=0.20, random_state=0)
+
+from sklearn import preprocessing
+
+X_train_norm = preprocessing.normalize(X_train)
+X_test_norm = preprocessing.normalize(X_test)
+
+from sklearn.cluster import KMeans 
+
+
+
+kmeans = KMeans(n_clusters = 3, random_state = 0, n_init='auto')
+kmeans.fit(X_train_norm)
+
+sns.scatterplot(data = X_train, x = 'longitude', y = 'latitude', hue = kmeans.labels_)
+
+sns.boxplot(x = kmeans.labels_, y = y_train['median_house_value'])
+
+from sklearn.metrics import silhouette_score
+
+silhouette_score(X_train_norm, kmeans.labels_, metric='euclidean')
+
+K = range(2, 8)
+fits = []
+score = []
+
+
+for k in K:
+  
+    model = KMeans(n_clusters = k, random_state = 0, n_init='auto').fit(X_train_norm)
+
+    fits.append(model)
+
+    score.append(silhouette_score(X_train_norm, model.labels_, metric='euclidean'))
+
+sns.scatterplot(data = X_train, x = 'longitude', y = 'latitude', hue = fits[0].labels_)
+
+sns.scatterplot(data = X_train, x = 'longitude', y = 'latitude', hue = fits[2].labels_)
+
+sns.scatterplot(data = X_train, x = 'longitude', y = 'latitude', hue = fits[2].labels_)
+
+sns.lineplot(x = K, y = score)
+
+sns.scatterplot(data = X_train, x = 'longitude', y = 'latitude', hue = fits[3].labels_)
+
+sns.boxplot(x = fits[3].labels_, y = y_train['median_house_value'])
+
